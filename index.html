@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pizzaria Alarme</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0 auto; width: 300px; background-color: #f4f4f4; color: #333; }
+        h2 { color: #b71c1c; text-align: center; }
+        label { display: block; text-align: left; }
+        input, button { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 5px; border: 1px solid #ccc; }
+        button { background-color: #b71c1c; color: #fff; cursor: pointer; margin-left: 2%; width: 96%; }
+        button:hover { background-color: #d32f2f; }
+        #listaPedidos { margin-top: 20px; }
+        .pedido { border: 1px solid #ccc; margin-bottom: 10px; padding: 10px; border-radius: 5px; background-color: #fff; }
+        .btnAcao { margin-top: 10px; }
+        #logo { display: block; margin: 0 auto; width: 50%; }
+    </style>
+</head>
+<body>
+    <!-- Substitua 'caminho_para_sua_logo.png' pelo caminho da imagem da sua logo -->
+    <img id="logo" src="logo.png" alt="Logo da Empresa">
+
+    <h2>Registro de Pedidos</h2>
+    <label for="pedido">Número do Pedido:</label>
+    <input type="text" id="pedido" name="pedido">
+    <label for="horario">Horário de Retirada:</label>
+    <input type="time" id="horario" name="horario">
+    <button onclick="adicionarAlarme()">Adicionar Alarme</button>
+
+    <div id="listaPedidos"></div>
+
+    <!-- Substitua 'C:\Users\ADM\Desktop\App Retirada\logo.png' pelo caminho do seu arquivo de áudio -->
+    <audio id="somAlarme" src="notificacao.mp3" preload="auto"></audio>
+
+    <script>
+        var listaPedidos = [];
+
+        function adicionarAlarme() {
+            var pedido = document.getElementById('pedido').value;
+            var horario = document.getElementById('horario').value;
+
+            // Adiciona o pedido à lista
+            listaPedidos.push({pedido: pedido, horario: horario});
+            atualizarListaPedidos();
+
+            // Converte o horário de retirada para um objeto Date
+            var dataRetirada = new Date();
+            dataRetirada.setHours(horario.split(":")[0]);
+            dataRetirada.setMinutes(horario.split(":")[1]);
+            dataRetirada.setSeconds(0);
+
+            // Subtrai 15 minutos do horário de retirada para o alarme
+            dataRetirada.setMinutes(dataRetirada.getMinutes() - 15);
+
+            // Cria o alarme
+            var agora = new Date();
+            var tempoParaAlarme = dataRetirada.getTime() - agora.getTime();
+            setTimeout(function() {
+                document.getElementById('somAlarme').play();
+                alert('Hora de preparar o pedido ' + pedido + '!');
+            }, tempoParaAlarme);
+        }
+
+        function atualizarListaPedidos() {
+            var divListaPedidos = document.getElementById('listaPedidos');
+            divListaPedidos.innerHTML = '';
+            for (let i = 0; i < listaPedidos.length; i++) {
+                var divPedido = document.createElement('div');
+                divPedido.className = 'pedido';
+                divPedido.innerHTML = 'Pedido: ' + listaPedidos[i].pedido + '<br>Horário de Retirada: ' + listaPedidos[i].horario;
+                var btnEditar = document.createElement('button');
+                btnEditar.innerHTML = 'Editar';
+                btnEditar.className = 'btnAcao';
+                btnEditar.onclick = criarFuncaoEditar(i);
+                var btnExcluir = document.createElement('button');
+                btnExcluir.innerHTML = 'Excluir';
+                btnExcluir.className = 'btnAcao';
+                btnExcluir.onclick = criarFuncaoExcluir(i);
+                divPedido.appendChild(btnEditar);
+                divPedido.appendChild(btnExcluir);
+                divListaPedidos.appendChild(divPedido);
+            }
+        }
+
+        function criarFuncaoEditar(index) {
+            return function() {
+                var pedido = prompt("Digite o novo número do pedido:", listaPedidos[index].pedido);
+                var horario = prompt("Digite o novo horário de retirada:", listaPedidos[index].horario);
+                if (pedido != null && horario != null) {
+                    listaPedidos[index] = {pedido: pedido, horario: horario};
+                    atualizarListaPedidos();
+                }
+            };
+        }
+
+        function criarFuncaoExcluir(index) {
+            return function() {
+                if (confirm("Tem certeza de que deseja excluir este pedido?")) {
+                    listaPedidos.splice(index, 1);
+                    atualizarListaPedidos();
+                }
+            };
+        }
+    </script>
+</body>
+</html>
